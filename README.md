@@ -27,12 +27,12 @@ savings.
 
 Tables are split into four torrents by part range:
 
-| Range | Torrent |
-|---|---|
-| 0-1000 | magnet link coming soon |
-| 1001-2000 | magnet link coming soon |
-| 2001-3000 | magnet link coming soon |
-| 3001-4095 | magnet link coming soon |
+| Range | Magnet | .torrent |
+|---|---|---|
+| 0-1000 | [magnet](magnet:?xt=urn:btih:2681cfe549c55a0abdeef35028507cd0a6741bcb&xt=urn:btmh:1220ba9c2c4e82a6ad9d6a0d59a6fee8d207c52196e02ed5de077df9ef30f0259c24&dn=0-1000-zstd&xl=1141991538688) | [0-1000-zstd.torrent](torrents/0-1000-zstd.torrent) |
+| 1001-2000 | coming soon | coming soon |
+| 2001-3000 | coming soon | coming soon |
+| 3001-4095 | coming soon | coming soon |
 
 Grab all four ranges for full coverage. Each `.rt.zst` file decompresses with
 `crackalack_rt2zst -d` (or the standard `zstd` CLI) before use, if you'd rather not
