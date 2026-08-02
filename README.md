@@ -1,0 +1,105 @@
+# NetNTLMv1 Rainbow Tables (zstd-compressed)
+
+Rainbow tables for cracking NetNTLMv1 challenge/response hashes, generated with
+[Rainbow Crackalack](https://github.com/bandrel/rainbowcrackalack) and compressed
+with zstd (`.rt.zst`, level 19).
+
+## Coverage
+
+- **Hash type:** NetNTLMv1 (one DES block per table entry — cracks a 7-byte half
+  of the underlying NTLM hash from a captured NetNTLMv1 response)
+- **Charset:** `byte` (full 0x00-0xFF keyspace)
+- **Chain length:** 881,689
+- **Table index:** 0 (single rainbow table, split into parts for parallel generation)
+- **Estimated coverage:** ~94.7% of the keyspace (Oechslin single-table model)
+- **Parts:** 16,388
+- **Total size:** ~4.1 TiB compressed (`.rt.zst`), down from 5.0 TiB as `.rtc`
+  (~1.22x smaller, zstd level 19)
+
+`crackalack_lookup` reads `.rt.zst` directly (no manual decompression needed) and
+streams the decompression to cap peak RSS, running at hundreds of MB/s — so there's
+no meaningful lookup-time penalty versus the raw `.rt` format, just the disk/bandwidth
+savings.
+
+![Expanding brain meme: raw .rt, 8.0 TiB -> perfectified .rtc, 5.0 TiB -> RAR -m5 on raw .rt, ~4.19 TiB, ~3.76s lookup/table -> zstd-19 .rt.zst, ~4.1 TiB, ~2.96s lookup/table](images/netntlmv1-zst-size-brain.png)
+
+## Download
+
+Tables are split into four torrents by part range:
+
+| Range | Torrent |
+|---|---|
+| 0-1000 | magnet link coming soon |
+| 1001-2000 | magnet link coming soon |
+| 2001-3000 | magnet link coming soon |
+| 3001-4095 | magnet link coming soon |
+
+Grab all four ranges for full coverage. Each `.rt.zst` file decompresses with
+`crackalack_rt2zst -d` (or the standard `zstd` CLI) before use, if you'd rather not
+let `crackalack_lookup` handle it directly. There is minimal performance decrease
+due to zstd streaming decompression.
+
+## Usage
+
+```bash
+./crackalack_lookup /path/to/tables/ /path/to/netntlmv1_hashes.txt
+```
+
+See [Rainbow Crackalack](https://github.com/bandrel/rainbowcrackalack) for build
+instructions and full usage docs.
+
+## Verification
+
+A `SHA256SUMS` file (coming soon, alongside the magnet links) covers every part
+for integrity verification independent of the torrent client.
+
+## Credits
+
+- Source tables: [duy-31/NetNTLMv1-Perfect-Tables](https://github.com/duy-31/NetNTLMv1-Perfect-Tables)
+  — this set is perfectified (duplicate endpoints removed) from those tables, then
+  converted back to rt and compressed with Rainbow Crackalack.
+- [Rainbow Crackalack](https://github.com/bandrel/rainbowcrackalack), the tool used
+  to generate, convert, and compress this set:
+  - [Joe Testa](https://www.positronsecurity.com/company/) ([@therealjoetesta](https://twitter.com/therealjoetesta))
+    — original author and designer of Rainbow Crackalack, including the OpenCL
+    implementation this project is descended from.
+  - [blurbdust](https://github.com/blurbdust), who continued Rainbow Crackalack
+    after the original went dormant — shout out for the RAR ingest work that gave
+    the idea for this release.
+  - [Justin Bollinger](https://github.com/bandrel) — current maintainer, added the
+    CUDA/Metal GPU backends, mask/Markov generation, NetNTLMv1 fast path, and this
+    zstd-compressed release.
+
+## Related Projects
+
+- [evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) — parses and
+  downgrades captured NetNTLMv1 challenge/response pairs into the format these
+  tables (and hashcat) expect. Complementary tooling, not a table set itself.
+
+## History and Prior Art
+
+NetNTLMv1 rainbow tables are not a new idea — this release sits alongside a long
+line of prior public efforts in the same space:
+
+- **crack.sh / cloudcracker.com** — the original public NetNTLMv1/MS-CHAPv2 DES
+  cracking service, following from Moxie Marlinspike, David Hulton, and Marsh
+  Ray's MS-CHAPv2-breaking work presented at DEF CON 20 (2012). NetNTLMv1 shares
+  an almost identical DES-based authentication process, so the same tables and
+  techniques carried over. See David Hulton's DES tooling:
+  [desrtop](https://github.com/h1kari/desrtop),
+  [des_kpt](https://github.com/h1kari/des_kpt),
+  [desrtfpga](https://github.com/h1kari/desrtfpga).
+- **blurbdust's community regeneration** (Oct 2019 - Dec 2024) — a multi-year
+  volunteer effort to recreate the crack.sh tables from scratch after they became
+  unavailable, using a `rainbowtables@home`-style distributed client and a fork
+  of the classic RainbowCrack-NG codebase
+  ([inAudible-NG/RainbowCrack-NG](https://github.com/inAudible-NG/RainbowCrack-NG)).
+  This is the same [blurbdust](https://github.com/blurbdust) already credited
+  above for Rainbow Crackalack's RAR ingest work.
+- **Mandiant / Google Cloud Security** — regenerated the full table set at data
+  center scale (internally named `rtv2`, corrected and re-released as `rtv3`
+  after a parameter bug was caught), and released the resulting dataset publicly
+  under a CC-BY license in December 2024 via
+  [Google Research](https://research.google/resources/datasets/?search=Net-NTLMv1&dataset_types=other).
+  Documented by Nic Losby in the talk *"Net-NTLMv1: The Easy Path for Red
+  Teamers"* (Mandiant, November 2025).
